@@ -1,10 +1,10 @@
-# Token Tactics is a board game meant to be played across 
-# several days, or even weeks! Meet once a day with 
-# all the players to play a round, then run 'next_turn'.
-# Between turns, you will strategize with your friends, and 
-# plan the next moves. Players that get eliminated keep playing 
-# as part of the jury, and will give energy to the remaining players.
-# Be the last remaining player to win! Have fun!
+# Token Tactics is a board game meant to be played across several 
+# days, or even weeks! Meet once a day with all the players to play 
+# a round, then run 'next_turn'. Between turns, you will strategize 
+# with your friends, and plan the next moves. Players that get 
+# eliminated keep playing as part of the jury, and will give energy 
+# to the remaining players. Be the last remaining player to win! 
+# Have fun!
 
 # --- Commands ---
 # move, shoot, heal, gift, gift_heart, upgrade, capture

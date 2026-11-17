@@ -36,7 +36,7 @@
 6. 🌼 Blossom
 7. 🍄 Mushroom
 8. 💐 Bouquet
-9. 🥀 Wilted Flower
+9. 🌾 Sheaf of Rice
 10. 🪻 Hyacinth
 11. 🌱 Seedling
 12. 🌿 Herb
@@ -48,11 +48,24 @@
 18. 🌲 Evergreen Tree
 19. 🌳 Deciduous Tree
 20. 🍁 Maple Leaf
-21. 🌾 Sheaf of Rice
-22. 🎋 Tanabata Tree
-23. 🎍 Pine Decoration
+21. 🎋 Tanabata Tree
+
 
 ## Shapes
-🔴🟠🟡🟢🔵🟣⚫️⚪️🟤 Circles
-🟥🟧🟨🟩🟦🟪⬛️⬜️🟫 Squares
+🔴🟠🟡🟢🔵🟣
+🟥🟧🟨🟩🟦🟪
 
+## Food
+
+1. 🍕 Pizza
+2. 🍔 Hamburger
+3. 🍣 Sushi
+4. 🍜 Ramen
+5. 🌮 Taco
+6. 🥐 Croissant
+7. 🍝 Spaghetti
+8. 🥑 Avocado
+9. 🍓 Strawberry
+10. 🍉 Watermelon
+11. 🍩 Doughnut
+12. 🍫 Chocolate Bar

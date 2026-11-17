@@ -52,6 +52,10 @@
   var commandColorInput = document.getElementById("setting-command-color");
   var commentColorInput = document.getElementById("setting-comment-color");
   var boardBgInput = document.getElementById("setting-board-bg");
+  var emojiBtn = document.getElementById("emoji-btn");
+  var emojiPanel = document.getElementById("emoji-panel");
+  var emojiGrid = document.getElementById("emoji-grid");
+  var toast = document.getElementById("toast");
 
   coordSelect.value = settings.coordinates;
   commandColorInput.value = settings.commandColor;
@@ -61,6 +65,12 @@
 
   gearBtn.addEventListener("click", function () {
     settingsPanel.classList.toggle("hidden");
+    emojiPanel.classList.add("hidden");
+  });
+
+  emojiBtn.addEventListener("click", function () {
+    emojiPanel.classList.toggle("hidden");
+    settingsPanel.classList.add("hidden");
   });
 
   coordSelect.addEventListener("change", function () {
@@ -86,6 +96,82 @@
     saveSettings();
     applyColors();
   });
+
+  // --- Emoji menu ---
+  var toastTimer = null;
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove("show");
+    }, 1500);
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function copyEmoji(emoji) {
+    var done = function () { showToast("Copied to clipboard!"); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(emoji).then(done, function () {
+        fallbackCopy(emoji);
+        done();
+      });
+    } else {
+      fallbackCopy(emoji);
+      done();
+    }
+  }
+
+  function graphemes(str) {
+    if (typeof Intl !== "undefined" && Intl.Segmenter) {
+      var seg = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+      return Array.from(seg.segment(str), function (s) { return s.segment; });
+    }
+    return Array.from(str);
+  }
+
+  var EMOJI_RE = /[\p{Extended_Pictographic}]/u;
+
+  function scrapeEmoji(text) {
+    var result = [];
+    var seen = new Set();
+    text.split("\n").forEach(function (line) {
+      graphemes(line).forEach(function (g) {
+        if (EMOJI_RE.test(g) && !seen.has(g)) {
+          seen.add(g);
+          result.push(g);
+        }
+      });
+    });
+    return result;
+  }
+
+  fetch("/emoji.txt")
+    .then(function (r) { return r.text(); })
+    .then(function (text) {
+      scrapeEmoji(text).forEach(function (emoji) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = emoji;
+        btn.title = "Copy " + emoji;
+        btn.addEventListener("click", function () { copyEmoji(emoji); });
+        emojiGrid.appendChild(btn);
+      });
+    })
+    .catch(function () {
+      emojiGrid.textContent = "Failed to load emoji";
+    });
 
   var editor = CodeMirror(document.getElementById("editor"), {
     value: "",
