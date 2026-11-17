@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TokenTactics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
   <link rel="stylesheet" href="/style.css" />
 </head>
@@ -20,7 +23,20 @@
 
   <main>
     <section id="board-panel">
-      <pre id="board">Loading…</pre>
+      <div id="board-box" class="box">
+        <div class="box-title">Board<span id="board-turn"></span></div>
+        <pre id="board">Loading…</pre>
+      </div>
+      <div id="side-col">
+        <div id="players-box" class="box">
+          <div class="box-title">Players</div>
+          <div id="players"></div>
+        </div>
+        <div id="priority-box" class="box">
+          <div class="box-title">Priority &amp; Votes</div>
+          <div id="priority"></div>
+        </div>
+      </div>
     </section>
     <section id="editor-panel">
       <div id="editor"></div>
@@ -47,6 +63,21 @@
     <label class="setting">
       <span>Board background</span>
       <input type="color" id="setting-board-bg" value="#141414" />
+    </label>
+    <label class="setting">
+      <span>Board size</span>
+      <span class="range-wrap">
+        <input type="range" id="setting-board-zoom" min="0.5" max="2.5" step="0.1" value="1" />
+        <span id="setting-board-zoom-value" class="range-value">1.0×</span>
+      </span>
+    </label>
+    <label class="setting">
+      <span>Accent color</span>
+      <input type="color" id="setting-accent" value="#ff2d95" />
+    </label>
+    <label class="setting">
+      <span>Secondary color</span>
+      <input type="color" id="setting-accent-2" value="#00e5ff" />
     </label>
   </div>
 

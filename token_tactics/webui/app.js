@@ -26,7 +26,10 @@
     coordinates: "dots",
     commandColor: "#89b4fa",
     commentColor: "#808080",
-    boardBg: "#141414"
+    boardBg: "#141414",
+    accent: "#ff2d95",
+    accent2: "#00e5ff",
+    boardZoom: 1
   };
   var settings = defaults;
   try {
@@ -44,6 +47,9 @@
     document.documentElement.style.setProperty("--command-color", settings.commandColor);
     document.documentElement.style.setProperty("--comment-color", settings.commentColor);
     document.documentElement.style.setProperty("--board-bg", settings.boardBg);
+    document.documentElement.style.setProperty("--accent", settings.accent);
+    document.documentElement.style.setProperty("--accent-2", settings.accent2);
+    document.documentElement.style.setProperty("--board-zoom", settings.boardZoom);
   }
 
   var settingsPanel = document.getElementById("settings-panel");
@@ -52,15 +58,27 @@
   var commandColorInput = document.getElementById("setting-command-color");
   var commentColorInput = document.getElementById("setting-comment-color");
   var boardBgInput = document.getElementById("setting-board-bg");
+  var accentInput = document.getElementById("setting-accent");
+  var accent2Input = document.getElementById("setting-accent-2");
+  var boardZoomInput = document.getElementById("setting-board-zoom");
+  var boardZoomValue = document.getElementById("setting-board-zoom-value");
   var emojiBtn = document.getElementById("emoji-btn");
   var emojiPanel = document.getElementById("emoji-panel");
   var emojiGrid = document.getElementById("emoji-grid");
   var toast = document.getElementById("toast");
 
+  function formatZoom(v) {
+    return (Math.round(v * 10) / 10).toFixed(1) + "×";
+  }
+
   coordSelect.value = settings.coordinates;
   commandColorInput.value = settings.commandColor;
   commentColorInput.value = settings.commentColor;
   boardBgInput.value = settings.boardBg;
+  accentInput.value = settings.accent;
+  accent2Input.value = settings.accent2;
+  boardZoomInput.value = settings.boardZoom;
+  boardZoomValue.textContent = formatZoom(settings.boardZoom);
   applyColors();
 
   gearBtn.addEventListener("click", function () {
@@ -93,6 +111,25 @@
 
   boardBgInput.addEventListener("input", function () {
     settings.boardBg = boardBgInput.value;
+    saveSettings();
+    applyColors();
+  });
+
+  accentInput.addEventListener("input", function () {
+    settings.accent = accentInput.value;
+    saveSettings();
+    applyColors();
+  });
+
+  accent2Input.addEventListener("input", function () {
+    settings.accent2 = accent2Input.value;
+    saveSettings();
+    applyColors();
+  });
+
+  boardZoomInput.addEventListener("input", function () {
+    settings.boardZoom = parseFloat(boardZoomInput.value);
+    boardZoomValue.textContent = formatZoom(settings.boardZoom);
     saveSettings();
     applyColors();
   });
@@ -194,8 +231,122 @@
   var statusLabel = document.getElementById("status-label");
   var errorBanner = document.getElementById("error-banner");
   var boardEl = document.getElementById("board");
+  var boardTurnEl = document.getElementById("board-turn");
+  var playersEl = document.getElementById("players");
+  var priorityEl = document.getElementById("priority");
   var lastErrorLine = null;
   var lastCompiledNorm = null;
+
+  function capitalize(name) {
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  function renderBoard(res) {
+    boardEl.textContent = res.board;
+    boardTurnEl.textContent = res.turn != null ? "TURN " + res.turn : "";
+  }
+
+  function renderPlayers(res) {
+    playersEl.textContent = "";
+    var s = res.symbols || {};
+    var heart = s.heart || "❤️";
+    var black = s.black_heart || "🖤";
+    var energy = s.energy || "⚡️";
+    (res.players || []).forEach(function (p) {
+      var div = document.createElement("div");
+      div.className = "player";
+
+      var name = document.createElement("div");
+      name.className = "player-name";
+      name.textContent = capitalize(p.name);
+      div.appendChild(name);
+
+      (p.tokens || []).forEach(function (t) {
+        var row = document.createElement("div");
+        row.className = "token-row";
+
+        var em = document.createElement("span");
+        em.className = "token-emoji";
+        em.textContent = t.emoji;
+        row.appendChild(em);
+
+        var life = document.createElement("span");
+        life.className = "life";
+        life.textContent = heart.repeat(t.life) + black.repeat(t.life_cap - t.life);
+        row.appendChild(life);
+
+        var en = document.createElement("span");
+        en.className = "energy";
+        en.textContent = energy.repeat(t.ap);
+        row.appendChild(en);
+
+        var rng = document.createElement("span");
+        rng.className = "range-tag";
+        rng.textContent = "range " + t.range;
+        row.appendChild(rng);
+
+        div.appendChild(row);
+      });
+
+      playersEl.appendChild(div);
+    });
+  }
+
+  function renderPriority(res) {
+    priorityEl.textContent = "";
+
+    var prioLabel = document.createElement("div");
+    prioLabel.className = "section-label";
+    prioLabel.textContent = "Priority";
+    priorityEl.appendChild(prioLabel);
+
+    (res.priority || []).forEach(function (name, i) {
+      var row = document.createElement("div");
+      row.className = "rank-row";
+      var num = document.createElement("span");
+      num.className = "rank-num";
+      num.textContent = String(i + 1);
+      var nm = document.createElement("span");
+      nm.className = "rank-name";
+      nm.textContent = capitalize(name);
+      row.appendChild(num);
+      row.appendChild(nm);
+      priorityEl.appendChild(row);
+    });
+
+    var jury = res.jury || {};
+    if (Object.keys(jury).length) {
+      var votesLabel = document.createElement("div");
+      votesLabel.className = "section-label";
+      votesLabel.textContent = "Votes";
+      priorityEl.appendChild(votesLabel);
+
+      Object.keys(jury).forEach(function (name) {
+        var row = document.createElement("div");
+        row.className = "vote-row";
+        var nm = document.createElement("span");
+        nm.className = "name";
+        nm.textContent = capitalize(name);
+        row.appendChild(nm);
+        var arrow = document.createElement("span");
+        arrow.className = "arrow";
+        arrow.textContent = "→";
+        row.appendChild(arrow);
+        if (jury[name]) {
+          var tok = document.createElement("span");
+          tok.className = "token";
+          tok.textContent = jury[name];
+          row.appendChild(tok);
+        } else {
+          var none = document.createElement("span");
+          none.className = "novote";
+          none.textContent = "no vote";
+          row.appendChild(none);
+        }
+        priorityEl.appendChild(row);
+      });
+    }
+  }
 
   function normalize(text) {
     return text.split("\n")
@@ -242,7 +393,9 @@
           setStatus(false);
         } else {
           clearError();
-          boardEl.textContent = res.state;
+          renderBoard(res);
+          renderPlayers(res);
+          renderPriority(res);
           lastCompiledNorm = normalize(text);
           setStatus(true);
         }

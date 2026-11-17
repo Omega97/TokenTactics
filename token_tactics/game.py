@@ -1065,6 +1065,42 @@ class Game:
         out += '\n'
         return out
 
+    def repr_board_grid(self):
+        """Square board grid with coordinate labels (no priority column)."""
+        self.force_board_size_set()
+        number_chars = [f"{c}" for c in self.palette.NUMBERS]
+        n_numbers = len(number_chars)
+        out = ''
+        for j in reversed(range(self.board_size)):
+            out += number_chars[j % n_numbers]
+            for i in range(self.board_size):
+                out += self.repr_tile(i, j)
+            out += '\n'
+        out += self.palette.CORNER_TILE
+        for i in range(self.board_size):
+            out += number_chars[i % n_numbers]
+        out += '\n'
+        return out
+
+    def player_data(self):
+        """Structured player stats for the UI (non-eliminated players only)."""
+        players = []
+        for player, tokens in self.iter_player_items():
+            if self.is_player_eliminated(player):
+                continue
+            token_data = []
+            for token in tokens:
+                info = self.get_token_info(token)
+                token_data.append({
+                    "emoji": token,
+                    "life": info.life,
+                    "life_cap": info.life_cap,
+                    "ap": info.ap,
+                    "range": info.range,
+                })
+            players.append({"name": player, "tokens": token_data})
+        return players
+
     def repr_player_life_repr(self, name_length=10):
         out = ''
         for player, tokens in self.iter_player_items():

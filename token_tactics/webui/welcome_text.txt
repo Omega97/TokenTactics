@@ -26,8 +26,9 @@ BOARD_SIZE default
 # === Game ON! ===
 
 # Day 1
+next_turn   # Start the first turn!
 
 # do your moves here
 # ...
 
-next_turn   # move to the next turn!
+

@@ -255,12 +255,23 @@ def compile_text(commands_text, palette=None):
             error_message = str(e)
             break
 
+    ok = error_line is None
     return {
-        "state": None if error_line is not None else game.repr(),
+        "state": game.repr() if ok else None,
+        "turn": game.turn_counter,
+        "board": game.repr_board_grid() if ok else None,
+        "players": game.player_data() if ok else [],
+        "priority": list(game.priority) if game.priority is not None else [],
+        "jury": dict(game.jury),
+        "symbols": {
+            "heart": game.palette.HEART,
+            "black_heart": game.palette.BLACK_HEART,
+            "energy": game.palette.ENERGY,
+        },
+        "winner": game.winner,
+        "game_over": game.is_game_over(),
         "error_line": error_line,
         "error_message": error_message,
-        "game_over": game.is_game_over(),
-        "winner": game.winner,
     }
 
 
