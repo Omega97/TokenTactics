@@ -1,0 +1,220 @@
+:root {
+  --bg: #1e1e2e;
+  --panel: #181825;
+  --border: #313244;
+  --text: #cdd6f4;
+  --muted: #6c7086;
+  --green: #a6e3a1;
+  --amber: #f9e2af;
+  --red: #f38ba8;
+  --error-bg: rgba(243, 139, 168, 0.12);
+  --command-color: #89b4fa;
+  --comment-color: #808080;
+  --board-bg: #141414;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+
+#topbar h1 {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  user-select: none;
+}
+
+.status .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status.compiled .dot { background: var(--green); }
+.status.compiled #status-label { color: var(--green); }
+
+.status.not-compiled .dot { background: var(--amber); }
+.status.not-compiled #status-label { color: var(--amber); }
+
+#error-banner {
+  padding: 8px 16px;
+  background: var(--error-bg);
+  color: var(--red);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  flex: 0 0 auto;
+  white-space: pre-wrap;
+}
+
+#error-banner.hidden { display: none; }
+
+main {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#board-panel,
+#editor-panel {
+  flex: 1 1 50%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#board-panel {
+  border-right: 1px solid var(--border);
+  background: var(--board-bg);
+  overflow: auto;
+}
+
+#board {
+  margin: 0;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: pre;
+}
+
+#editor-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+#editor {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.CodeMirror {
+  height: 100%;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.CodeMirror-gutters {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+
+.CodeMirror-linenumber { color: var(--muted); }
+
+.CodeMirror-cursor {
+  border-left: 2px solid var(--text) !important;
+}
+
+.CodeMirror-selected {
+  background: rgba(205, 214, 244, 0.2) !important;
+}
+
+.cm-command { color: var(--command-color); }
+.cm-s-default .cm-comment { color: var(--comment-color); }
+
+#settings-gear {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
+}
+
+#settings-gear:hover {
+  color: var(--text);
+  transform: rotate(30deg);
+}
+
+#settings-panel {
+  position: fixed;
+  left: 16px;
+  bottom: 68px;
+  width: 240px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+#settings-panel.hidden { display: none; }
+
+#settings-panel h2 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+#settings-panel .setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+#settings-panel .setting:last-child { margin-bottom: 0; }
+
+#settings-panel select {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 12px;
+  max-width: 150px;
+}
+
+#settings-panel input[type="color"] {
+  width: 40px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.error-line {
+  background: var(--error-bg) !important;
+}

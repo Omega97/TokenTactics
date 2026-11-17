@@ -1,0 +1,58 @@
+# Animals
+1. 🐶 Dog Face
+2. 🐱 Cat Face
+3. 🦊 Fox
+4. 🦁 Lion
+5. 🐯 Tiger Face
+6. 🐻 Bear
+7. 🐼 Panda
+8. 🐨 Koala
+9. 🐸 Frog
+10. 🐵 Monkey Face
+11. 🦋 Butterfly
+12. 🐝 Honeybee
+13. 🐢 Turtle
+14. 🦄 Unicorn
+15. 🐉 Dragon
+16. 🦖 T-Rex
+17. 🐺 Wolf
+18. 🦝 Raccoon
+19. 🦉 Owl
+20. 🦅 Eagle
+21. 🐧 Penguin
+22. 🦆 Duck
+23. 🦢 Swan
+24. 🦈 Shark
+25. 🐙 Octopus
+26. 🐋 Whale
+27. 🐬 Dolphin
+
+## Plants
+1. 🌹 Rose
+2. 🌻 Sunflower
+3. 🌸 Cherry Blossom
+4. 🪵 Wood
+5. 🌷 Tulip
+6. 🌼 Blossom
+7. 🍄 Mushroom
+8. 💐 Bouquet
+9. 🥀 Wilted Flower
+10. 🪻 Hyacinth
+11. 🌱 Seedling
+12. 🌿 Herb
+13. 🍃 Leaf Fluttering in Wind
+14. 🍀 Four Leaf Clover
+15. 🪴 Potted Plant
+16. 🌵 Cactus
+17. 🌴 Palm Tree
+18. 🌲 Evergreen Tree
+19. 🌳 Deciduous Tree
+20. 🍁 Maple Leaf
+21. 🌾 Sheaf of Rice
+22. 🎋 Tanabata Tree
+23. 🎍 Pine Decoration
+
+## Shapes
+🔴🟠🟡🟢🔵🟣⚫️⚪️🟤 Circles
+🟥🟧🟨🟩🟦🟪⬛️⬜️🟫 Squares
+

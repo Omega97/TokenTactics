@@ -1,0 +1,33 @@
+# Token Tactics is a board game meant to be played across 
+# several days, or even weeks! Meet once a day with 
+# all the players to play a round, then run 'next_turn'.
+# Between turns, you will strategize with your friends, and 
+# plan the next moves. Players that get eliminated keep playing 
+# as part of the jury, and will give energy to the remaining players.
+# Be the last remaining player to win! Have fun!
+
+# --- Commands ---
+# move, shoot, heal, gift, gift_heart, upgrade, capture
+
+# --- Declare the Players ---
+PLAYER Alice
+PLAYER Bob
+PLAYER Charlie
+
+# --- Distribute the Tokens ---
+TOKEN 🐬 Alice
+TOKEN 🍎 Bob
+TOKEN 🍕 Charlie
+
+# --- Set the Parameters ---
+RANDOM_SEED 42
+BOARD_SIZE default
+
+# === Game ON! ===
+
+# Day 1
+
+# do your moves here
+# ...
+
+next_turn   # move to the next turn!
