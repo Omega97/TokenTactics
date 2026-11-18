@@ -21,7 +21,7 @@ TOKEN 🍎 Vito
 TOKEN 🍕 Cris
 TOKEN 🟢 Peter 
 TOKEN 🐬 Omar
-TOKEN 🪻 Michele
+TOKEN 🦝 Michele
 
 # --- Set the Parameters ---
 RANDOM_SEED 42
@@ -31,12 +31,10 @@ BOARD_SIZE default
 
 # Day 1
 next_turn   # Start the first turn!
-shoot 🪻 🟢
+shoot 🦝 🟢
 next_turn
 heal 🐬 🟢
 move 🟢 +1 +1
 
-# Day 2
-next_turn
 
 

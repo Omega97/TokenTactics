@@ -1,5 +1,9 @@
 # Token Tactics
 
+<div align="center">
+    <img src="saves/board.png" width="500">
+</div>
+
 Deterministic token-based multiplayer board game. Feed it a text list of
 commands and it computes the final board state.
 
@@ -18,9 +22,6 @@ python -m token_tactics --ui     # open the browser editor UI
 `shoot`, `heal`, `upgrade`, `capture`, `vote`, plus cost params
 (`MOVE_COST`, `SHOOT_COST`, ...). See `commands.txt` for an example.
 
-## Board state
-
-![Board state](saves/board.png)
 
 ## Use as a library (UI)
 
