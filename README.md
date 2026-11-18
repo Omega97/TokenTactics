@@ -15,8 +15,12 @@ python -m token_tactics --ui     # open the browser editor UI
 ## Commands
 
 `PLAYER`, `TOKEN`, `RANDOM_SEED`, `BOARD_SIZE`, `next_turn`, `move`, `gift`,
-`shoot`, `heal`, `gift_heart`, `upgrade`, `capture`, `vote`, plus cost params
+`shoot`, `heal`, `upgrade`, `capture`, `vote`, plus cost params
 (`MOVE_COST`, `SHOOT_COST`, ...). See `commands.txt` for an example.
+
+## Board state
+
+![Board state](saves/board.png)
 
 ## Use as a library (UI)
 

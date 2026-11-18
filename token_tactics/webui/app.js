@@ -134,6 +134,31 @@
     applyColors();
   });
 
+  // --- Save board + commands ---
+  function autoSave() {
+    var node = document.getElementById("board-panel");
+    if (!node || typeof html2canvas === "undefined") return;
+    html2canvas(node, {
+      backgroundColor: "#15001f",
+      scale: 2,
+      useCORS: true,
+      logging: false
+    }).then(function (canvas) {
+      canvas.toBlob(function (blob) {
+        var reader = new FileReader();
+        reader.onloadend = function () {
+          var base64 = String(reader.result).split(",")[1] || "";
+          fetch("/api/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: editor.getValue(), png: base64 })
+          }).catch(function (err) { console.warn("Auto-save failed:", err); });
+        };
+        reader.readAsDataURL(blob);
+      }, "image/png");
+    }).catch(function (err) { console.warn("Screenshot failed:", err); });
+  }
+
   // --- Emoji menu ---
   var toastTimer = null;
 
@@ -202,13 +227,35 @@
         btn.type = "button";
         btn.textContent = emoji;
         btn.title = "Copy " + emoji;
-        btn.addEventListener("click", function () { copyEmoji(emoji); });
+        btn.addEventListener("click", function () {
+          copyEmoji(emoji);
+          emojiPanel.classList.add("hidden");
+        });
         emojiGrid.appendChild(btn);
       });
     })
     .catch(function () {
       emojiGrid.textContent = "Failed to load emoji";
     });
+
+  function swapLine(cm, dir) {
+    var cur = cm.getCursor();
+    var line = cur.line;
+    var other = line + dir;
+    if (other < 0 || other >= cm.lineCount()) return;
+    var top = Math.min(line, other);
+    var bottom = Math.max(line, other);
+    var topText = cm.getLine(top);
+    var bottomText = cm.getLine(bottom);
+    cm.operation(function () {
+      cm.replaceRange(
+        bottomText + "\n" + topText + "\n",
+        { line: top, ch: 0 },
+        { line: bottom + 1, ch: 0 }
+      );
+    });
+    cm.setCursor({ line: other, ch: Math.min(cur.ch, cm.getLine(other).length) });
+  }
 
   var editor = CodeMirror(document.getElementById("editor"), {
     value: "",
@@ -223,7 +270,9 @@
       },
       "Ctrl-Enter": function (cm) {
         compile();
-      }
+      },
+      "Shift-Alt-Up": function (cm) { swapLine(cm, -1); },
+      "Shift-Alt-Down": function (cm) { swapLine(cm, 1); }
     }
   });
 
@@ -236,6 +285,7 @@
   var priorityEl = document.getElementById("priority");
   var lastErrorLine = null;
   var lastCompiledNorm = null;
+  var tokenSet = new Set();
 
   function capitalize(name) {
     return name.charAt(0).toUpperCase() + name.slice(1);
@@ -246,8 +296,54 @@
     boardTurnEl.textContent = res.turn != null ? "TURN " + res.turn : "";
   }
 
+  function textOffsetAtPoint(x, y) {
+    if (document.caretPositionFromPoint) {
+      var pos = document.caretPositionFromPoint(x, y);
+      if (pos && pos.offsetNode && pos.offsetNode.nodeType === 3) {
+        return { node: pos.offsetNode, offset: pos.offset };
+      }
+    }
+    if (document.caretRangeFromPoint) {
+      var range = document.caretRangeFromPoint(x, y);
+      if (range && range.startContainer && range.startContainer.nodeType === 3) {
+        return { node: range.startContainer, offset: range.startOffset };
+      }
+    }
+    return null;
+  }
+
+  function graphemeAtOffset(text, offset) {
+    if (typeof Intl !== "undefined" && Intl.Segmenter) {
+      var it = new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text);
+      for (var seg of it) {
+        if (offset >= seg.index && offset < seg.index + seg.segment.length) {
+          return seg.segment;
+        }
+      }
+      return null;
+    }
+    var cps = Array.from(text);
+    var idx = 0;
+    for (var i = 0; i < cps.length; i++) {
+      var len = cps[i].length;
+      if (offset >= idx && offset < idx + len) return cps[i];
+      idx += len;
+    }
+    return null;
+  }
+
+  boardEl.addEventListener("click", function (e) {
+    var hit = textOffsetAtPoint(e.clientX, e.clientY);
+    if (!hit || hit.node !== boardEl.firstChild) return;
+    var grapheme = graphemeAtOffset(boardEl.textContent, hit.offset);
+    if (grapheme && tokenSet.has(grapheme)) {
+      copyEmoji(grapheme);
+    }
+  });
+
   function renderPlayers(res) {
     playersEl.textContent = "";
+    tokenSet.clear();
     var s = res.symbols || {};
     var heart = s.heart || "❤️";
     var black = s.black_heart || "🖤";
@@ -262,6 +358,7 @@
       div.appendChild(name);
 
       (p.tokens || []).forEach(function (t) {
+        tokenSet.add(t.emoji);
         var row = document.createElement("div");
         row.className = "token-row";
 
@@ -361,11 +458,15 @@
     statusLabel.textContent = compiled ? "compiled" : "not compiled";
   }
 
+  function clearErrorHighlights() {
+    editor.eachLine(function (line) {
+      editor.removeLineClass(line, "background", "error-line");
+    });
+  }
+
   function clearError() {
-    if (lastErrorLine != null) {
-      editor.removeLineClass(lastErrorLine, "background", "error-line");
-      lastErrorLine = null;
-    }
+    clearErrorHighlights();
+    lastErrorLine = null;
     errorBanner.classList.add("hidden");
     errorBanner.textContent = "";
   }
@@ -374,6 +475,7 @@
     errorBanner.textContent = "Line " + lineNo + ": " + message;
     errorBanner.classList.remove("hidden");
     var line = lineNo - 1;
+    clearErrorHighlights();
     editor.addLineClass(line, "background", "error-line");
     editor.scrollIntoView({ line: line, ch: 0 }, 60);
     lastErrorLine = line;
@@ -398,6 +500,7 @@
           renderPriority(res);
           lastCompiledNorm = normalize(text);
           setStatus(true);
+          autoSave();
         }
       })
       .catch(function (err) {

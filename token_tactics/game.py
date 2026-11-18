@@ -61,8 +61,7 @@ class DefaultParams:
     GIFT_COST = 0   # If 0 then no AP gets burned in the transaction
     MOVE_COST = 1
     SHOOT_COST = 1
-    GIFT_HEART_COST = 1     # +HEAL_SELF_COST if you consider that you lost a heart
-    HEAL_SELF_COST = 2
+    HEAL_COST = 2
     UPGRADE_COST = 5    # but you get one heart
     CAPTURE_COST = 5    # but the captured token gets one heart
 
@@ -305,32 +304,50 @@ class ShootCommand(Command):
 
 
 class HealCommand(Command):
-    def __init__(self, game: 'Game', token: str, player: str | None = None):
+    def __init__(self, game: 'Game', token: str, target: str | None = None, player: str | None = None):
         super().__init__(game, player)
         self.token = token
+        self.target = target
 
     def execute(self) -> str:
         """
-        heal [token]
-        Heal own token +1 life (up to life_cap)
+        heal [token] [target?]
+        Heal a token +1 life (up to its life cap).
+        Heals itself, or another token within range.
+        Revives a knocked-out token's player from the jury.
         Cost: 2 AP
         """
         game = self.game
         token = self.token
-        cost = game.parameters.HEAL_SELF_COST
+        target = self.target if self.target is not None else token
+        cost = game.parameters.HEAL_COST
+        palette = game.palette
 
-        game.check_tokens_exist(token)
+        game.check_tokens_exist(token, target)
         game.check_has_ap(token, cost)
-        game.check_life_cap(token)
+        if target != token:
+            game.check_range(token, target)
+        game.check_life_cap(target)
 
         # Execute heal
         game.spend_ap(token, cost)
-        game.increase_life(token)
+        game.increase_life(target)
 
         # Update priority
         game.update_priority(game.get_owner(token))
 
-        return f"{token} healed +1 💚 {game.repr_lifebar(token)}"
+        if target == token:
+            msg = f"{token} healed itself +1 {palette.HEART} {game.repr_lifebar(target)}"
+        else:
+            msg = f"{token} healed {target} +1 {palette.HEART} {game.repr_lifebar(target)}"
+
+        # Revive a knocked-out token's player from the jury.
+        target_owner = game.get_owner(target)
+        if target_owner in game.jury:
+            game.remove_from_jury(target_owner)
+            msg += f" → {target_owner} revived from jury!"
+
+        return msg
 
 
 class UpgradeCommand(Command):
@@ -369,57 +386,6 @@ class UpgradeCommand(Command):
         msg = (f"{token} upgraded! "
                f"New life cap: {new_cap} {game.repr_lifebar(token)}, "
                f"range: {new_range} {'🏹' * new_range}")
-
-        return msg
-
-
-class GiftHeartCommand(Command):
-    def __init__(self, game: 'Game', token_1: str, token_2: str, n_hearts: int = 1, player: str | None = None):
-        super().__init__(game, player)
-        self.token_1 = token_1
-        self.token_2 = token_2
-        self.n_hearts = n_hearts
-
-    def execute(self) -> str:
-        """
-        gift_heart [token_1] [token_2]
-        Gift 1 heart from token_1 to token_2.
-        token_1 can't remain without hearts.
-        token_2 must be in range of token_1.
-        If token_2's owner was in jury → bring them back.
-        Cost: 1 AP
-        """
-        game = self.game
-        token_1 = self.token_1
-        token_2 = self.token_2
-        n_hearts = self.n_hearts
-        cost = game.parameters.GIFT_HEART_COST
-
-        game.check_tokens_exist(token_1, token_2)
-        game.check_has_ap(token_1, cost)
-        game.check_range(token_1, token_2)
-        game.check_has_life(token_1, amount=n_hearts + 1)
-        game.check_life_cap(token_2, extra_hearts=+n_hearts)
-
-        # Execute gift heart
-        game.spend_ap(token_1, cost)
-        game.decrease_life(token_1, n_hearts)
-        game.increase_life(token_2, n_hearts)
-
-        # Check if we revive someone from jury
-        target_owner = game.get_owner(token_2)
-        msg = f"{token_1} → {token_2} : gifted 1 {game.palette.HEART}"
-        if target_owner in game.jury:
-            game.remove_from_jury(target_owner)
-            msg += f" → {target_owner} revived from jury!"
-
-        # Update priority
-        game.update_priority(game.get_owner(token_1))
-
-        # Check if donor died from this action
-        donor_owner = game.get_owner(token_1)
-        if game.get_life(token_1) == 0 and game.is_player_eliminated(donor_owner):
-            msg += f" → {donor_owner} sacrificed last heart"
 
         return msg
 
@@ -738,42 +704,23 @@ class SetShootCostCommand(Command):
         return f"Shoot cost set to {cost} AP"
 
 
-class SetGiftHeartCostCommand(Command):
+class SetHealCostCommand(Command):
     def __init__(self, game: 'Game', cost: int, player: str | None = None):
         super().__init__(game, player)
         self.cost = cost
 
     def execute(self) -> str:
         """
-        GIFT_HEART_COST [cost]
-        Change the AP cost for gifting a heart.
-        """
-        game = self.game
-        cost = self.cost
-
-        if cost < 1:
-            raise RangeError("Gift heart cost must be at least 1")
-        game.parameters.GIFT_HEART_COST = cost
-        return f"Gift heart cost set to {cost} AP"
-
-
-class SetHealSelfCostCommand(Command):
-    def __init__(self, game: 'Game', cost: int, player: str | None = None):
-        super().__init__(game, player)
-        self.cost = cost
-
-    def execute(self) -> str:
-        """
-        HEAL_SELF_COST [cost]
-        Change the AP cost for healing own token.
+        HEAL_COST [cost]
+        Change the AP cost for healing a token.
         """
         game = self.game
         cost = self.cost
 
         if cost < 1:
             raise RangeError("Heal cost must be at least 1")
-        game.parameters.HEAL_SELF_COST = cost
-        return f"Heal self cost set to {cost} AP"
+        game.parameters.HEAL_COST = cost
+        return f"Heal cost set to {cost} AP"
 
 
 class SetCaptureCostCommand(Command):
@@ -1171,7 +1118,7 @@ class Game:
         if extra_hearts < 0:
             raise ValueError("Extra hearts amount can't be negative.")
         if self.get_life(token) + extra_hearts > self.get_life_cap(token):
-            raise InvalidMoveError(f"{token} cannot receive any more hearts (did you mean 'gift_heart'?)")
+            raise InvalidMoveError(f"{token} is already at full life")
 
     def check_range(self, token_1, token_2, distance=None):
         """
@@ -1311,7 +1258,6 @@ class Game:
         "gift": GiftCommand,
         "shoot": ShootCommand,
         "heal": HealCommand,
-        "gift_heart": GiftHeartCommand,
         "upgrade": UpgradeCommand,
         "capture": CaptureCommand,
         "vote": VoteCommand,
@@ -1323,8 +1269,7 @@ class Game:
         "gift_cost": SetGiftCostCommand,
         "move_cost": SetMoveCostCommand,
         "shoot_cost": SetShootCostCommand,
-        "gift_heart_cost": SetGiftHeartCostCommand,
-        "heal_self_cost": SetHealSelfCostCommand,
+        "heal_cost": SetHealCostCommand,
         "upgrade_cost": SetUpgradeCostCommand,
         "capture_cost": SetCaptureCostCommand,
         "ap_per_turn": SetAPPerTurnCostCommand,

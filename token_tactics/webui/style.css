@@ -64,6 +64,12 @@ body {
   letter-spacing: 1px;
 }
 
+#topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .status .dot {
   width: 10px;
   height: 10px;
@@ -144,7 +150,7 @@ main {
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex: 0 0 auto;
 }
 
@@ -161,6 +167,7 @@ main {
   font-size: 11px;
   color: var(--accent-2);
   letter-spacing: 1px;
+  margin-left: auto;
 }
 
 #board {
@@ -173,9 +180,9 @@ main {
   border-radius: 0 0 8px 8px;
 }
 
-/* --- Side column (players + priority) --- */
-#side-col {
-  flex: 1 1 auto;
+/* --- Right column (board + priority) --- */
+#right-col {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -183,10 +190,10 @@ main {
   min-height: 0;
 }
 
-#players-box { flex: 1 1 55%; border-color: rgba(0, 229, 255, 0.35); box-shadow: 0 0 20px rgba(0, 229, 255, 0.16); }
+#players-box { flex: 1 1 auto; border-color: rgba(0, 229, 255, 0.35); box-shadow: 0 0 20px rgba(0, 229, 255, 0.16); }
 #players-box .box-title { color: var(--accent-2); }
 
-#priority-box { flex: 1 1 45%; }
+#priority-box { flex: 1 1 auto; }
 
 #players, #priority {
   padding: 12px;

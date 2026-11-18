@@ -11,7 +11,7 @@ import time
 import hashlib
 import inspect
 
-from .game import Game, Palette, AsciiPalette, FIRST_FILE_CONTENT
+from .game import Game, GameError, Palette, AsciiPalette, FIRST_FILE_CONTENT
 
 
 def read_emoji_file(path) -> dict:

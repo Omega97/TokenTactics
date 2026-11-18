@@ -5,6 +5,7 @@ Starts a local HTTP server, opens a browser window, and serves the editor UI.
 The interpreter itself stays in `runner.compile_text`; this module only handles
 HTTP transport and static file serving.
 """
+import base64
 import json
 import os
 import webbrowser
@@ -26,7 +27,10 @@ CONTENT_TYPES = {
 }
 
 
-def _make_handler(commands_file, palette):
+def _make_handler(commands_file, palette, saves_dir):
+    save_commands = os.path.join(saves_dir, "commands.txt")
+    save_board = os.path.join(saves_dir, "board.png")
+
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, fmt, *args):
             pass  # silence request logs
@@ -72,7 +76,10 @@ def _make_handler(commands_file, palette):
         # --- routes ---
         def do_GET(self):
             if self.path == "/api/welcome":
-                if os.path.exists(WELCOME_FILE):
+                if os.path.exists(save_commands):
+                    with open(save_commands, "r", encoding="utf-8") as f:
+                        text = f.read()
+                elif os.path.exists(WELCOME_FILE):
                     with open(WELCOME_FILE, "r", encoding="utf-8") as f:
                         text = f.read()
                 elif os.path.exists(commands_file):
@@ -95,18 +102,32 @@ def _make_handler(commands_file, palette):
                 result = compile_text(body.get("text", ""), palette=active_palette)
                 self._send_json(200, result)
                 return
+            if self.path == "/api/save":
+                body = self._read_json_body()
+                try:
+                    os.makedirs(saves_dir, exist_ok=True)
+                    with open(save_commands, "w", encoding="utf-8") as f:
+                        f.write(body.get("text", ""))
+                    png = body.get("png", "")
+                    with open(save_board, "wb") as f:
+                        f.write(base64.b64decode(png))
+                    self._send_json(200, {"ok": True})
+                except Exception as e:
+                    self._send_json(500, {"ok": False, "error": str(e)})
+                return
             self._send(404, "Not found", "text/plain; charset=utf-8")
 
     return Handler
 
 
-def serve(commands_file="commands.txt", palette=None, open_browser=True, port=0):
+def serve(commands_file="commands.txt", palette=None, open_browser=True, port=0, saves_dir="saves"):
     """
     Start the web UI server and (optionally) open a browser window.
 
     Blocks until the server is stopped (Ctrl+C).
     """
-    handler = _make_handler(commands_file, palette)
+    saves_dir = os.path.join(os.getcwd(), saves_dir)
+    handler = _make_handler(commands_file, palette, saves_dir)
     server = ThreadingHTTPServer(("127.0.0.1", port), handler)
     url = f"http://127.0.0.1:{server.server_address[1]}/"
     print(f"TokenTactics UI running at {url}")

@@ -13,9 +13,11 @@
 <body>
   <header id="topbar">
     <h1>TokenTactics</h1>
-    <div id="status" class="status compiled" title="compiled">
-      <span class="dot"></span>
-      <span id="status-label">compiled</span>
+    <div id="topbar-right">
+      <div id="status" class="status compiled" title="compiled">
+        <span class="dot"></span>
+        <span id="status-label">compiled</span>
+      </div>
     </div>
   </header>
 
@@ -23,14 +25,14 @@
 
   <main>
     <section id="board-panel">
-      <div id="board-box" class="box">
-        <div class="box-title">Board<span id="board-turn"></span></div>
-        <pre id="board">Loading…</pre>
+      <div id="players-box" class="box">
+        <div class="box-title">Players</div>
+        <div id="players"></div>
       </div>
-      <div id="side-col">
-        <div id="players-box" class="box">
-          <div class="box-title">Players</div>
-          <div id="players"></div>
+      <div id="right-col">
+        <div id="board-box" class="box">
+          <div class="box-title">Board<span id="board-turn"></span></div>
+          <pre id="board">Loading…</pre>
         </div>
         <div id="priority-box" class="box">
           <div class="box-title">Priority &amp; Votes</div>
@@ -96,6 +98,7 @@
   <div id="toast">Copied to clipboard!</div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

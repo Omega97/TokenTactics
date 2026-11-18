@@ -1,4 +1,4 @@
-# move, shoot, heal, gift, gift_heart, upgrade, capture
+# move, shoot, heal, gift, upgrade, capture
 
 # Players
 PLAYER Cris
