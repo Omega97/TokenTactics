@@ -173,11 +173,24 @@ main {
 #board {
   margin: 0;
   padding: 12px;
-  font-size: calc(15px * var(--board-zoom));
-  line-height: 1.15;
-  white-space: pre;
   background: var(--board-bg);
   border-radius: 0 0 8px 8px;
+  --cell-size: calc(20px * var(--board-zoom));
+}
+
+.board-row {
+  display: flex;
+}
+
+.board-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  font-size: calc(14px * var(--board-zoom));
+  line-height: 1;
+  user-select: none;
 }
 
 /* --- Right column (board + priority) --- */

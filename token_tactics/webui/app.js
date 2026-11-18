@@ -23,7 +23,7 @@
   // --- Settings (persisted to localStorage) ---
   var SETTINGS_KEY = "tt.settings";
   var defaults = {
-    coordinates: "dots",
+    coordinates: "numbers",
     commandColor: "#89b4fa",
     commentColor: "#808080",
     boardBg: "#141414",
@@ -292,52 +292,29 @@
   }
 
   function renderBoard(res) {
-    boardEl.textContent = res.board;
+    boardEl.textContent = "";
     boardTurnEl.textContent = res.turn != null ? "TURN " + res.turn : "";
-  }
-
-  function textOffsetAtPoint(x, y) {
-    if (document.caretPositionFromPoint) {
-      var pos = document.caretPositionFromPoint(x, y);
-      if (pos && pos.offsetNode && pos.offsetNode.nodeType === 3) {
-        return { node: pos.offsetNode, offset: pos.offset };
-      }
-    }
-    if (document.caretRangeFromPoint) {
-      var range = document.caretRangeFromPoint(x, y);
-      if (range && range.startContainer && range.startContainer.nodeType === 3) {
-        return { node: range.startContainer, offset: range.startOffset };
-      }
-    }
-    return null;
-  }
-
-  function graphemeAtOffset(text, offset) {
-    if (typeof Intl !== "undefined" && Intl.Segmenter) {
-      var it = new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text);
-      for (var seg of it) {
-        if (offset >= seg.index && offset < seg.index + seg.segment.length) {
-          return seg.segment;
-        }
-      }
-      return null;
-    }
-    var cps = Array.from(text);
-    var idx = 0;
-    for (var i = 0; i < cps.length; i++) {
-      var len = cps[i].length;
-      if (offset >= idx && offset < idx + len) return cps[i];
-      idx += len;
-    }
-    return null;
+    (res.board || "").split("\n").forEach(function (line) {
+      if (line === "") return;
+      var row = document.createElement("div");
+      row.className = "board-row";
+      graphemes(line).forEach(function (g) {
+        var cell = document.createElement("span");
+        cell.className = "board-cell";
+        cell.textContent = g;
+        cell.dataset.emoji = g;
+        row.appendChild(cell);
+      });
+      boardEl.appendChild(row);
+    });
   }
 
   boardEl.addEventListener("click", function (e) {
-    var hit = textOffsetAtPoint(e.clientX, e.clientY);
-    if (!hit || hit.node !== boardEl.firstChild) return;
-    var grapheme = graphemeAtOffset(boardEl.textContent, hit.offset);
-    if (grapheme && tokenSet.has(grapheme)) {
-      copyEmoji(grapheme);
+    var cell = e.target && e.target.closest ? e.target.closest(".board-cell") : null;
+    if (!cell) return;
+    var emoji = cell.dataset.emoji;
+    if (emoji && tokenSet.has(emoji)) {
+      copyEmoji(emoji);
     }
   });
 
