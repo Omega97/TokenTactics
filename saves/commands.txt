@@ -18,23 +18,25 @@ PLAYER Michele
 
 # --- Distribute the Tokens ---
 TOKEN 🍎 Vito
+TOKEN 🔴 Vito
 TOKEN 🍕 Cris
+TOKEN 🟡 Cris
+TOKEN 🦖 Peter
 TOKEN 🟢 Peter 
 TOKEN 🐬 Omar
+TOKEN 🔵 Omar
 TOKEN 🦝 Michele
+TOKEN 🐺 Michele
 
 # --- Set the Parameters ---
-RANDOM_SEED 42
+RANDOM_SEED 420
 BOARD_SIZE default
 
 # === Game ON! ===
 
 # Day 1
 next_turn   # Start the first turn!
-shoot 🦝 🟢
-next_turn
-heal 🐬 🟢
-move 🟢 +1 +1
+
 
 
 
